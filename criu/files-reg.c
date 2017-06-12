@@ -38,6 +38,9 @@
 #include "files-reg.h"
 #include "plugin.h"
 
+#include <stdio.h>  
+#include <sys/time.h>  
+
 int setfsuid(uid_t fsuid);
 int setfsgid(gid_t fsuid);
 
@@ -808,6 +811,11 @@ int dead_pid_conflict(void)
 {
 	int i;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
+
 	for (i = 0; i < n_dead_pids; i++) {
 		struct pid *node;
 		pid_t pid = dead_pids[i];
@@ -834,6 +842,11 @@ int dead_pid_conflict(void)
 		return -1;
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dead_pid_conflict time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+	
 	return 0;
 }
 

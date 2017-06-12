@@ -10,7 +10,7 @@
 #include "util.h"
 #include "image.h"
 #include "images/stats.pb-c.h"
-
+#include <stdio.h> 
 struct timing {
 	struct timeval start;
 	struct timeval total;
@@ -186,11 +186,21 @@ void write_stats(int what)
 
 int init_stats(int what)
 {
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (what == DUMP_STATS) {
 		dstats = xzalloc(sizeof(*dstats));
 		return dstats ? 0 : -1;
 	}
 
 	rstats = shmalloc(sizeof(struct restore_stats));
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("init_stats time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
+
 	return rstats ? 0 : -1;
 }

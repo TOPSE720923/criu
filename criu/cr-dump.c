@@ -815,9 +815,19 @@ int collect_pstree_ids(void)
 {
 	struct pstree_item *item;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	for_each_pstree_item(item)
 		if (get_task_ids(item))
 			return -1;
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_pstree_ids time is %ldsec (%ld us)\n\n",  dif_sec, dif_sec*1000000+dif_usec);
 
 	return 0;
 }
@@ -1077,6 +1087,10 @@ static int dump_zombies(void)
 	int ret = -1;
 	int pidns = root_ns_mask & CLONE_NEWPID;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (pidns && set_proc_fd(get_service_fd(CR_PROC_FD_OFF)))
 		return -1;
 
@@ -1113,9 +1127,20 @@ static int dump_zombies(void)
 	}
 
 	ret = 0;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_zombies time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 err:
 	if (pidns)
 		close_proc();
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_zombies error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return ret;
 }
@@ -1436,6 +1461,12 @@ static int setup_alarm_handler()
 		.sa_handler	= alarm_handler,
 		.sa_flags	= 0, /* Don't restart syscalls */
 	};
+	
+
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGALRM);
@@ -1443,6 +1474,12 @@ static int setup_alarm_handler()
 		pr_perror("Unable to setup SIGALRM handler");
 		return -1;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("setup_alarm_handler time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return 0;
 }
@@ -1583,6 +1620,10 @@ static int cr_dump_finish(int ret)
 {
 	int post_dump_ret = 0;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (disconnect_from_page_server())
 		ret = -1;
 
@@ -1656,6 +1697,12 @@ static int cr_dump_finish(int ret)
 		write_stats(DUMP_STATS);
 		pr_info("Dumping finished successfully\n");
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cr_dump_finish time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+	
 	return post_dump_ret ? : (ret != 0);
 }
 
@@ -1665,6 +1712,8 @@ int cr_dump_tasks(pid_t pid)
 	struct pstree_item *item;
 	int pre_dump_ret = 0;
 	int ret = -1;
+
+	int task_num = 0;
 
 	pr_info("========================================\n");
 	pr_info("Dumping processes (pid: %d)\n", pid);
@@ -1750,8 +1799,18 @@ int cr_dump_tasks(pid_t pid)
 		goto err;
 
 	for_each_pstree_item(item) {
+
+		struct timeval start,end;  
+    	long dif_sec, dif_usec;  
+    	gettimeofday(&start, NULL);
+
 		if (dump_one_task(item))
 			goto err;
+
+		gettimeofday(&end, NULL);  
+    	dif_sec = end.tv_sec - start.tv_sec;  
+    	dif_usec = end.tv_usec - start.tv_usec;       
+    	printf("dump_task:%d time is %ldsec (%ld us)\n\n", task_num, dif_sec, dif_sec*1000000+dif_usec);
 	}
 
 	/*

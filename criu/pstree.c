@@ -17,6 +17,9 @@
 #include "protobuf.h"
 #include "images/pstree.pb-c.h"
 
+#include <stdio.h>  
+#include <sys/time.h>
+
 struct pstree_item *root_item;
 static struct rb_root pid_root_rb;
 
@@ -270,6 +273,10 @@ int dump_pstree(struct pstree_item *root_item)
 	int ret = -1, i;
 	struct cr_img *img;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("\n");
 	pr_info("Dumping pstree (pid: %d)\n", root_item->pid->real);
 	pr_info("----------------------------------------\n");
@@ -319,9 +326,21 @@ int dump_pstree(struct pstree_item *root_item)
 	}
 	ret = 0;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_pstree time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 err:
 	pr_info("----------------------------------------\n");
 	close_image(img);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_pstree error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

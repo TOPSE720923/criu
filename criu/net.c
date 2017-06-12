@@ -37,6 +37,8 @@
 
 #include "protobuf.h"
 #include "images/netdev.pb-c.h"
+#include <stdio.h>  
+#include <sys/time.h> 
 
 #ifndef IFLA_LINK_NETNSID
 #define IFLA_LINK_NETNSID	37
@@ -1812,6 +1814,11 @@ static int network_unlock_internal()
 
 int network_lock(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("Lock network\n");
 
 	/* Each connection will be locked on dump */
@@ -1820,6 +1827,12 @@ int network_lock(void)
 
 	if (run_scripts(ACT_NET_LOCK))
 		return -1;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("network_lock time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 
 	return network_lock_internal();
 }

@@ -23,6 +23,8 @@
 #include <compel/compel.h>
 #include <compel/plugins/std/syscall.h>
 
+#include <sys/time.h>
+
 #ifdef LOG_PREFIX
 # undef LOG_PREFIX
 #endif
@@ -460,6 +462,10 @@ static int vdso_fill_compat_symtable(struct vdso_symtable *native,
 
 int vdso_init(void)
 {
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (vdso_fill_self_symtable(&vdso_sym_rt)) {
 		pr_err("Failed to fill self vdso symtable\n");
 		return -1;
@@ -474,6 +480,11 @@ int vdso_init(void)
 		pr_info("VDSO detection turned off\n");
 	else if (vaddr_to_pfn(vdso_sym_rt.vma_start, &vdso_pfn))
 		return -1;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("vdso_init time is %ldsec (%ld us)\n\n",  dif_sec, dif_sec*1000000+dif_usec);
 
 	return 0;
 }

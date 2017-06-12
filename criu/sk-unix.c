@@ -31,6 +31,8 @@
 
 #include "protobuf.h"
 #include "images/sk-unix.pb-c.h"
+#include <stdio.h>  
+#include <sys/time.h>
 
 #undef	LOG_PREFIX
 #define LOG_PREFIX "sk unix: "
@@ -736,6 +738,10 @@ int fix_external_unix_sockets(void)
 {
 	struct unix_sk_desc *sk;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_debug("Dumping external sockets\n");
 
 	list_for_each_entry(sk, &unix_sockets, list) {
@@ -769,8 +775,18 @@ int fix_external_unix_sockets(void)
 			goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("fix_external_unix_sockets time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return 0;
 err:
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("fix_external_unix_sockets error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 	return -1;
 }
 

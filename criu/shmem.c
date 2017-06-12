@@ -25,6 +25,9 @@
 #include "protobuf.h"
 #include "images/pagemap.pb-c.h"
 
+#include <stdio.h>  
+#include <sys/time.h>
+
 #ifndef SEEK_DATA
 #define SEEK_DATA	3
 #define SEEK_HOLE	4
@@ -792,6 +795,10 @@ int cr_dump_shmem(void)
 	int ret = 0, i;
 	struct shmem_info *si;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	for_each_shmem(i, si) {
 		if (si->pid == SYSVIPC_SHMEM_PID)
 			continue;
@@ -799,6 +806,17 @@ int cr_dump_shmem(void)
 		if (ret)
 			goto out;
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cr_dump_shmem time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 out:
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cr_dump_shmem error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }

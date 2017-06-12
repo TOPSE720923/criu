@@ -12,7 +12,7 @@
 #include "plugin.h"
 #include "common/list.h"
 #include "log.h"
-
+#include <sys/time.h>
 cr_plugin_ctl_t cr_plugin_ctl = {
 	.head.next = &cr_plugin_ctl.head,
 	.head.prev = &cr_plugin_ctl.head,
@@ -196,6 +196,10 @@ int cr_plugin_init(int stage)
 	size_t i;
 	DIR *d;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	INIT_LIST_HEAD(&cr_plugin_ctl.head);
 	for (i = 0; i < ARRAY_SIZE(cr_plugin_ctl.hook_chain); i++)
 		INIT_LIST_HEAD(&cr_plugin_ctl.hook_chain[i]);
@@ -244,11 +248,22 @@ int cr_plugin_init(int stage)
 	}
 
 	exit_code = 0;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cr_plugin_init time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 err:
 	closedir(d);
 
 	if (exit_code)
 		cr_plugin_fini(stage, exit_code);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cr_plugin_init error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return exit_code;
 }

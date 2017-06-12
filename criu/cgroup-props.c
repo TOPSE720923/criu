@@ -20,6 +20,8 @@
 #include "log.h"
 #include "common/bug.h"
 
+#include <sys/time.h>
+
 #undef	LOG_PREFIX
 #define LOG_PREFIX "cg-prop: "
 
@@ -497,6 +499,11 @@ int cgp_init(char *stream, size_t len, char *path)
 {
 	int ret;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
+
 	ret = cgp_parse_builtins();
 	if (ret)
 		goto err;
@@ -509,7 +516,17 @@ int cgp_init(char *stream, size_t len, char *path)
 
 	if (path)
 		ret = cgp_parse_file(path);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cgp_init time  is %ldsec (%ld us)\n\n",  dif_sec, dif_sec*1000000+dif_usec);
+
 err:
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cgp_init time  error is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 	return ret;
 }
 

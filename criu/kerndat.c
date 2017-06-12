@@ -31,6 +31,8 @@
 #include <compel/compel.h>
 #include "netfilter.h"
 
+#include <stdio.h>  
+#include <sys/time.h>  
 struct kerndat_s kdat = {
 };
 
@@ -644,6 +646,10 @@ int kerndat_init(void)
 {
 	int ret;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	ret = kerndat_try_load_cache();
 	if (ret <= 0)
 		return ret;
@@ -682,6 +688,11 @@ int kerndat_init(void)
 
 	if (!ret)
 		kerndat_save_cache();
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("kerndat_init time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return ret;
 }

@@ -15,7 +15,8 @@
 
 #include "protobuf.h"
 #include "images/cpuinfo.pb-c.h"
-
+#include <stdio.h>  
+#include <sys/time.h> 
 static compel_cpuinfo_t rt_cpuinfo;
 
 #ifdef __LITTLE_ENDIAN__
@@ -31,6 +32,11 @@ int cpu_init(void)
 
 int cpu_dump_cpuinfo(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	CpuinfoEntry cpu_info = CPUINFO_ENTRY__INIT;
 	CpuinfoPpc64Entry cpu_ppc64_info = CPUINFO_PPC64_ENTRY__INIT;
 	CpuinfoPpc64Entry *cpu_ppc64_info_ptr = &cpu_ppc64_info;
@@ -51,6 +57,12 @@ int cpu_dump_cpuinfo(void)
 	ret = pb_write_one(img, &cpu_info, PB_CPUINFO);
 
 	close_image(img);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cpu_dump_cpuinfo ppc64 time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

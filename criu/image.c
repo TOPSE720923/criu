@@ -16,7 +16,7 @@
 #include "xmalloc.h"
 #include "images/inventory.pb-c.h"
 #include "images/pagemap.pb-c.h"
-
+#include <sys/time.h>
 bool ns_per_id = false;
 bool img_common_magic = true;
 TaskKobjIdsEntry *root_ids;
@@ -91,6 +91,10 @@ int write_img_inventory(InventoryEntry *he)
 {
 	struct cr_img *img;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("Writing image inventory (version %u)\n", CRTOOLS_IMAGES_V1);
 
 	img = open_image(CR_FD_INVENTORY, O_DUMP);
@@ -102,6 +106,12 @@ int write_img_inventory(InventoryEntry *he)
 
 	xfree(he->root_ids);
 	close_image(img);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("write_img_inventory time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+	
 	return 0;
 }
 
@@ -112,6 +122,10 @@ int prepare_inventory(InventoryEntry *he)
 		struct pstree_item i;
 		struct dmp_info d;
 	} crt = { .i.pid = &pid };
+
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
 
 	pr_info("Perparing image inventory (version %u)\n", CRTOOLS_IMAGES_V1);
 
@@ -133,6 +147,12 @@ int prepare_inventory(InventoryEntry *he)
 		return -1;
 
 	he->root_ids = crt.i.ids;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("prepare_inventory time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 
 	return 0;
 }

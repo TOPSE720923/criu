@@ -18,6 +18,8 @@
 #include "protobuf.h"
 #include "images/seccomp.pb-c.h"
 
+#include <stdio.h>  
+#include <sys/time.h>  
 /* populated on dump during collect_seccomp_filters() */
 static int next_filter_id = 0;
 static struct seccomp_info **filters = NULL;
@@ -186,11 +188,21 @@ static int dump_seccomp_filters(void)
 
 int collect_seccomp_filters(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (preorder_pstree_traversal(root_item, collect_filter_for_pstree) < 0)
 		return -1;
 
 	if (dump_seccomp_filters())
 		return -1;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_seccomp_filters time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return 0;
 }

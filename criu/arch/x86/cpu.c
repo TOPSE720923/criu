@@ -24,6 +24,7 @@
 #include "protobuf.h"
 #include "images/cpuinfo.pb-c.h"
 
+#include <sys/time.h>
 #undef	LOG_PREFIX
 #define LOG_PREFIX "cpu: "
 
@@ -31,6 +32,11 @@ static compel_cpuinfo_t rt_cpu_info;
 
 int cpu_init(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (compel_cpuid(&rt_cpu_info))
 		return -1;
 
@@ -53,11 +59,21 @@ int cpu_init(void)
 		 !!compel_cpu_has_feature(X86_FEATURE_FXSR),
 		 !!compel_cpu_has_feature(X86_FEATURE_OSXSAVE));
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cpu_init time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return 0;
 }
 
 int cpu_dump_cpuinfo(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	CpuinfoEntry cpu_info = CPUINFO_ENTRY__INIT;
 	CpuinfoX86Entry cpu_x86_info = CPUINFO_X86_ENTRY__INIT;
 	CpuinfoX86Entry *cpu_x86_info_ptr = &cpu_x86_info;
@@ -89,6 +105,12 @@ int cpu_dump_cpuinfo(void)
 	}
 
 	close_image(img);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("cpu_dump_cpuinfo X86 time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return 0;
 }
 

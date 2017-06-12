@@ -30,6 +30,9 @@
 #include "images/fsnotify.pb-c.h"
 #include "images/fh.pb-c.h"
 
+#include <stdio.h>  
+#include <sys/time.h> 
+
 #undef	LOG_PREFIX
 #define LOG_PREFIX "irmap: "
 
@@ -445,6 +448,10 @@ int irmap_load_cache(void)
 	int ret;
 	struct cr_img *img;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	ret = open_irmap_cache(&img);
 	if (ret <= 0)
 		return ret;
@@ -465,6 +472,12 @@ int irmap_load_cache(void)
 	}
 
 	close_image(img);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("kerndat_init time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

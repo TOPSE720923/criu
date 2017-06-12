@@ -19,6 +19,8 @@
 #include "servicefd.h"
 #include "file-lock.h"
 
+#include <stdio.h>  
+#include <sys/time.h>
 struct file_lock_rst {
 	FileLockEntry *fle;
 	struct list_head l;
@@ -90,6 +92,10 @@ int dump_file_locks(void)
 	struct file_lock *fl;
 	int	ret = 0;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("Dumping file-locks\n");
 
 	list_for_each_entry(fl, &file_lock_list, list) {
@@ -120,7 +126,19 @@ int dump_file_locks(void)
 		}
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_file_locks time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 err:
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_file_locks error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

@@ -45,6 +45,7 @@
 #include "images/mnt.pb-c.h"
 
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifndef SIGEV_SIGNAL
 #define SIGEV_SIGNAL    0       /* notify via signal */
@@ -2036,6 +2037,11 @@ int parse_file_locks(void)
 	int	exit_code = -1;
 	bool	is_blocked;
 
+
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (kdat.has_fdinfo_lock)
 		return 0;
 
@@ -2094,8 +2100,20 @@ int parse_file_locks(void)
 	}
 
 	exit_code = 0;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_file_locks time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 err:
 	fclose(fl_locks);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_file_locks time error is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return exit_code;
 }
 

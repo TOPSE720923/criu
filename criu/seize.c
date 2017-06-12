@@ -22,7 +22,7 @@
 #include "xmalloc.h"
 #include "util.h"
 #include <compel/compel.h>
-
+#include <stdio.h> 
 #define NR_ATTEMPTS 5
 
 static const char frozen[]	= "FROZEN";
@@ -830,6 +830,11 @@ err_close:
 
 int collect_pstree(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pid_t pid = root_item->pid->real;
 	int ret = -1;
 	struct proc_status_creds *creds;
@@ -881,9 +886,20 @@ int collect_pstree(void)
 	timing_stop(TIME_FREEZING);
 	timing_start(TIME_FROZEN);
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_pstree time  is %ldsec (%ld us)\n\n",  dif_sec, dif_sec*1000000+dif_usec);
+
 err:
 	/* Freezing stage finished in time - disable timer. */
 	alarm(0);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_pstree error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

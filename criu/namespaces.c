@@ -31,6 +31,9 @@
 #include "images/ns.pb-c.h"
 #include "images/userns.pb-c.h"
 
+#include <stdio.h>  
+#include <sys/time.h> 
+
 static struct ns_desc *ns_desc_array[] = {
 	&net_ns_desc,
 	&uts_ns_desc,
@@ -997,6 +1000,9 @@ int dump_namespaces(struct pstree_item *item, unsigned int ns_flags)
 	int pid, nr = 0;
 	int ret = 0;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
 	/*
 	 * The setns syscall is cool, we can switch to the other
 	 * namespace and then return back to our initial one, but
@@ -1064,6 +1070,12 @@ int dump_namespaces(struct pstree_item *item, unsigned int ns_flags)
 	}
 
 	pr_info("Namespaces dump complete\n");
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_namespaces time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+	
 	return 0;
 }
 
@@ -1483,6 +1495,11 @@ int collect_namespaces(bool for_dump)
 {
 	int ret;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
+
 	ret = collect_user_namespaces(for_dump);
 	if (ret < 0)
 		return ret;
@@ -1494,6 +1511,11 @@ int collect_namespaces(bool for_dump)
 	ret = collect_net_namespaces(for_dump);
 	if (ret < 0)
 		return ret;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("collect_namespaces time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return 0;
 }

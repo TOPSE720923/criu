@@ -42,6 +42,8 @@
 #include "fdstore.h"
 #include "tty.h"
 
+#include <sys/time.h>
+
 /*
  * Here are some notes about overall TTY c/r design. At moment
  * we support unix98 ptys only. Supporting legacy BSD terminals
@@ -1675,6 +1677,11 @@ int dump_verify_tty_sids(void)
 	struct tty_dump_info *dinfo, *n;
 	int ret = 0;
 
+
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	/*
 	 * There might be a cases where we get sid/pgid on
 	 * slave peer. For example the application is running
@@ -1715,6 +1722,11 @@ int dump_verify_tty_sids(void)
 			}
 		}
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_verify_tty_sids time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	return ret;
 }
@@ -2150,12 +2162,22 @@ static int tty_verify_ctty(void)
 
 int tty_post_actions(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
 	if (tty_verify_ctty())
 		return -1;
 	if (tty_verify_active_pairs(NULL))
 		return -1;
 	else if (tty_dump_queued_data())
 		return -1;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("tty_post_actions time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return 0;
 }
 

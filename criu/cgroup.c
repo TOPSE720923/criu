@@ -23,7 +23,7 @@
 #include "protobuf.h"
 #include "images/core.pb-c.h"
 #include "images/cgroup.pb-c.h"
-
+#include <sys/time.h>
 /*
  * This structure describes set of controller groups
  * a task lives in. The cg_ctl entries are stored in
@@ -176,9 +176,17 @@ struct cg_controller *new_controller(const char *name)
 
 int parse_cg_info(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
 	if (collect_controllers(&cgroups, &n_cgroups) < 0)
 		return -1;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("parse_cg_info time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 	return 0;
 }
 
@@ -895,6 +903,10 @@ int dump_cgroups(void)
 	CgroupEntry cg = CGROUP_ENTRY__INIT;
 	int ret = -1;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	BUG_ON(!criu_cgset || !root_cgset);
 
 	/*
@@ -918,9 +930,21 @@ int dump_cgroups(void)
 
 	pr_info("Writing CG image\n");
 	ret = pb_write_one(img_from_set(glob_imgset, CR_FD_CGROUP), &cg, PB_CGROUP);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_cgroups time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 err:
 	free_sets(&cg, cg.n_sets);
 	xfree(cg.controllers);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("dump_cgroups error time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return ret;
 }
 

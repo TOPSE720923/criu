@@ -18,6 +18,9 @@
 #include "images/pagemap.pb-c.h"
 #include "fcntl.h"
 
+#include <stdio.h>  
+#include <sys/time.h>
+
 static int page_server_sk = -1;
 
 struct page_server_iov {
@@ -743,6 +746,11 @@ no_server:
 
 int connect_to_page_server(void)
 {
+	
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if (!opts.use_page_server)
 		return 0;
 
@@ -762,6 +770,12 @@ out:
 	 * on urgent data is the smartest mode ever.
 	 */
 	tcp_cork(page_server_sk, true);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("connect_to_page_server time is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return 0;
 }
 
