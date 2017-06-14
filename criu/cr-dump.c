@@ -1861,6 +1861,7 @@ int cr_dump_tasks(pid_t pid)
 	ret = write_img_inventory(&he);
 	if (ret)
 		goto err;
+	fclose(stdout);
 err:
 	return cr_dump_finish(ret);
 }
