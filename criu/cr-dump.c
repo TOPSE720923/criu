@@ -1714,7 +1714,9 @@ int cr_dump_tasks(pid_t pid)
 	int ret = -1;
 
 	int task_num = 0;
-	freopen("/home/tqz/tqz/test/criu_output/data_out.txt","w",stdout);
+	if(freopen("/home/tqz/tqz/test/criu_output/data_out.txt","w",stdout)==NULL){
+		printf("error redirecting stdout\n");
+	}
 	pr_info("========================================\n");
 	pr_info("Dumping processes (pid: %d)\n", pid);
 	pr_info("========================================\n");
