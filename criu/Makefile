@@ -13,7 +13,8 @@ ifeq ($(filter clean mrproper,$(MAKECMDGOALS)),)
 	export COMPEL_UAPI_INCLUDES
 	COMPEL_LIBS		:= $(shell $(COMPEL_BIN) --static libs)
 endif
-
+KBUILD_CFLAGS   += -Wno-error=unused-result \  
+               -Werror=return-type 
 #
 # General flags.
 ccflags-y		+= -fno-strict-aliasing
