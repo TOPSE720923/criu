@@ -15,6 +15,7 @@ ifeq ($(filter clean mrproper,$(MAKECMDGOALS)),)
 endif
 KBUILD_CFLAGS   += -Wno-error=unused-result \  
                -Werror=return-type 
+KBUILD_CFLAGS += $(call cc-option, -fno-stack-protector)
 #
 # General flags.
 ccflags-y		+= -fno-strict-aliasing
