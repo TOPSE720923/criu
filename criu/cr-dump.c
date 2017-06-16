@@ -1713,6 +1713,7 @@ int cr_dump_tasks(pid_t pid)
 	int pre_dump_ret = 0;
 	int ret = -1;
 	static int cnt = 0;
+	static int count_printf =0;
 	int task_num = 0;
 	if(freopen("/home/tqz/tqz/test/criu_output/data_out.txt","w",stdout)==NULL){
 		printf("error redirecting stdout\n");
@@ -1722,6 +1723,7 @@ int cr_dump_tasks(pid_t pid)
 	pr_info("========================================\n");
 	cnt++;
 	printf("第%d次调用cr_dump_tasks\n",cnt );
+	printf("第%d次调用printf\n",++count_printf);
 	root_item = alloc_pstree_item();
 	if (!root_item)
 		goto err;
@@ -1812,8 +1814,9 @@ int cr_dump_tasks(pid_t pid)
 
 		gettimeofday(&end, NULL);  
     	dif_sec = end.tv_sec - start.tv_sec;  
-    	dif_usec = end.tv_usec - start.tv_usec;       
-    	printf("dump_task:%d time is %ldsec (%ld us)\n\n", task_num, dif_sec, dif_sec*1000000+dif_usec);
+    	dif_usec = end.tv_usec - start.tv_usec; 
+    	printf("dump_task total num :%d\n",item );    
+    	printf("dump_task:%d time is %ldsec (%ld us)\n\n", ++task_num, dif_sec, dif_sec*1000000+dif_usec);
 	}
 
 	/*
