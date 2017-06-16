@@ -1815,7 +1815,7 @@ int cr_dump_tasks(pid_t pid)
 		gettimeofday(&end, NULL);  
     	dif_sec = end.tv_sec - start.tv_sec;  
     	dif_usec = end.tv_usec - start.tv_usec; 
-    	printf("dump_task total num :%d\n",item );    
+    //	printf("dump_task total num :%d\n",item );    
     	printf("dump_task:%d time is %ldsec (%ld us)\n\n", ++task_num, dif_sec, dif_sec*1000000+dif_usec);
 	}
 
