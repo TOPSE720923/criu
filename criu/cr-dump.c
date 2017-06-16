@@ -1712,7 +1712,7 @@ int cr_dump_tasks(pid_t pid)
 	struct pstree_item *item;
 	int pre_dump_ret = 0;
 	int ret = -1;
-
+	static int cnt = 0;
 	int task_num = 0;
 	if(freopen("/home/tqz/tqz/test/criu_output/data_out.txt","w",stdout)==NULL){
 		printf("error redirecting stdout\n");
@@ -1720,7 +1720,8 @@ int cr_dump_tasks(pid_t pid)
 	pr_info("========================================\n");
 	pr_info("Dumping processes (pid: %d)\n", pid);
 	pr_info("========================================\n");
-
+	cnt++;
+	printf("第%d次调用cr_dump_tasks\n",cnt );
 	root_item = alloc_pstree_item();
 	if (!root_item)
 		goto err;
