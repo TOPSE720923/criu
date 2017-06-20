@@ -1847,28 +1847,64 @@ int cr_dump_tasks(pid_t pid)
 	if (dump_zombies())
 		goto err;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until dump_pstree is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
+
 	if (dump_pstree(root_item))
 		goto err;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until dump_namespaces is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
 
 	if (root_ns_mask)
 		if (dump_namespaces(root_item, root_ns_mask) < 0)
 			goto err;
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until dump_cgroups is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
+
 	ret = dump_cgroups();
 	if (ret)
 		goto err;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until cr_dump_shmem is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
 
 	ret = cr_dump_shmem();
 	if (ret)
 		goto err;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until fix_external_unix_sockets is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
+
 	ret = fix_external_unix_sockets();
 	if (ret)
 		goto err;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until tty_post_actions is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
+
 	ret = tty_post_actions();
 	if (ret)
 		goto err;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time until write_img_inventory is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
 
 	ret = write_img_inventory(&he);
 	gettimeofday(&end, NULL);  
