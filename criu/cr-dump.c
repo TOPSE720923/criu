@@ -1715,9 +1715,15 @@ int cr_dump_tasks(pid_t pid)
 	static int cnt = 0;
 	static int count_printf =0;
 	int task_num = 0;
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	if(freopen("/home/tqz/tqz/test/criu_output/data_out.txt","w",stdout)==NULL){
 		printf("error redirecting stdout\n");
 	}
+
+
 	pr_info("========================================\n");
 	pr_info("Dumping processes (pid: %d)\n", pid);
 	pr_info("========================================\n");
@@ -1865,6 +1871,10 @@ int cr_dump_tasks(pid_t pid)
 		goto err;
 
 	ret = write_img_inventory(&he);
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("<==> cr_dump_tasks time  is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec); 
 	if (ret)
 		goto err;
 	fclose(stdout);
