@@ -1236,6 +1236,11 @@ static int dump_one_task(struct pstree_item *item)
 	INIT_LIST_HEAD(&vmas.h);
 	vmas.nr = 0;
 
+
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("========================================\n");
 	pr_info("Dumping task (pid: %d)\n", pid);
 	pr_info("========================================\n");
@@ -1246,16 +1251,32 @@ static int dump_one_task(struct pstree_item *item)
 		 */
 		return 0;
 
+	
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parse_pid_stat is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	pr_info("Obtaining task stat ... \n");
 	ret = parse_pid_stat(pid, &pps_buf);
 	if (ret < 0)
 		goto err;
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until collect_mappings is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = collect_mappings(pid, &vmas, dump_filemap);
 	if (ret) {
 		pr_err("Collect mappings (pid: %d) failed with %d\n", pid, ret);
 		goto err;
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until collect_fds is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	if (!shared_fdtable(item)) {
 		dfds = xmalloc(sizeof(*dfds));
@@ -1271,13 +1292,29 @@ static int dump_one_task(struct pstree_item *item)
 		parasite_ensure_args_size(drain_fds_size(dfds));
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parse_posix_timers is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = parse_posix_timers(pid, &proc_args);
 	if (ret < 0) {
 		pr_err("Can't read posix timers file (pid: %d)\n", pid);
 		goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_ensure_args_size is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	parasite_ensure_args_size(posix_timers_dump_size(proc_args.timer_n));
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_signals is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = dump_task_signals(pid, item);
 	if (ret) {
@@ -1285,16 +1322,34 @@ static int dump_one_task(struct pstree_item *item)
 		goto err;
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_infect_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	parasite_ctl = parasite_infect_seized(pid, item, &vmas);
 	if (!parasite_ctl) {
 		pr_err("Can't infect (pid: %d) with parasite\n", pid);
 		goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until fault_injected is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	if (fault_injected(FI_DUMP_EARLY)) {
 		pr_info("fault: CRIU sudden detach\n");
 		BUG();
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_get_proc_fd_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 
 	if (root_ns_mask & CLONE_NEWPID && root_item == item) {
 		int pfd;
@@ -1311,11 +1366,22 @@ static int dump_one_task(struct pstree_item *item)
 		close(pfd);
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_fixup_vdso is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = parasite_fixup_vdso(parasite_ctl, pid, &vmas);
 	if (ret) {
 		pr_err("Can't fixup vdso VMAs (pid: %d)\n", pid);
 		goto err_cure_imgset;
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_collect_aios is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = parasite_collect_aios(parasite_ctl, &vmas); /* FIXME -- merge with above */
 	if (ret) {
@@ -1323,11 +1389,23 @@ static int dump_one_task(struct pstree_item *item)
 		goto err_cure_imgset;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_dump_misc_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = parasite_dump_misc_seized(parasite_ctl, &misc);
 	if (ret) {
 		pr_err("Can't dump misc (pid: %d)\n", pid);
 		goto err_cure_imgset;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until pstree_insert_pid is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	item->pid->ns[0].virt = misc.pid;
 	pstree_insert_pid(item->pid);
@@ -1343,15 +1421,33 @@ static int dump_one_task(struct pstree_item *item)
 		goto err_cure;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until cr_task_imgset_open is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	cr_imgset = cr_task_imgset_open(vpid(item), O_DUMP);
 	if (!cr_imgset)
 		goto err_cure;
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_ids is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = dump_task_ids(item, cr_imgset);
 	if (ret) {
 		pr_err("Dump ids (pid: %d) failed with %d\n", pid, ret);
 		goto err_cure;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_files_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	if (dfds) {
 		ret = dump_task_files_seized(parasite_ctl, item, dfds);
@@ -1363,15 +1459,32 @@ static int dump_one_task(struct pstree_item *item)
 
 	mdc.pre_dump = false;
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_dump_pages_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = parasite_dump_pages_seized(item, &vmas, &mdc, parasite_ctl);
 	if (ret)
 		goto err_cure;
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_dump_sigacts_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = parasite_dump_sigacts_seized(parasite_ctl, item);
 	if (ret) {
 		pr_err("Can't dump sigactions (pid: %d) with parasite\n", pid);
 		goto err_cure;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until parasite_dump_posix_timers_seized is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = parasite_dump_itimers_seized(parasite_ctl, item);
 	if (ret) {
@@ -1385,11 +1498,21 @@ static int dump_one_task(struct pstree_item *item)
 		goto err_cure;
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_core_all is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = dump_task_core_all(parasite_ctl, item, &pps_buf, cr_imgset);
 	if (ret) {
 		pr_err("Dump core (pid: %d) failed with %d\n", pid, ret);
 		goto err_cure;
 	}
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until compel_stop_daemon is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = compel_stop_daemon(parasite_ctl);
 	if (ret) {
@@ -1397,11 +1520,23 @@ static int dump_one_task(struct pstree_item *item)
 		goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_threads is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = dump_task_threads(parasite_ctl, item);
 	if (ret) {
 		pr_err("Can't dump threads\n");
 		goto err;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until compel_cure is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = compel_cure(parasite_ctl);
 	if (ret) {
@@ -1409,11 +1544,23 @@ static int dump_one_task(struct pstree_item *item)
 		goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_mm is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = dump_task_mm(pid, &pps_buf, &misc, &vmas, cr_imgset);
 	if (ret) {
 		pr_err("Dump mappings (pid: %d) failed with %d\n", pid, ret);
 		goto err;
 	}
+
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until dump_task_fs is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	ret = dump_task_fs(pid, &misc, cr_imgset);
 	if (ret) {
@@ -1421,18 +1568,60 @@ static int dump_one_task(struct pstree_item *item)
 		goto err;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until close_cr_imgset is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	close_cr_imgset(&cr_imgset);
 	exit_code = 0;
 err:
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until close_pid_proc is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	close_pid_proc();
 	free_mappings(&vmas);
 	xfree(dfds);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until exit_code is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	return exit_code;
 
 err_cure:
+	
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until close_cr_imgset is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 	close_cr_imgset(&cr_imgset);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  after close_cr_imgset is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 err_cure_imgset:
+	
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  until compel_cure is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 	compel_cure(parasite_ctl);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     dump_one_task time  after compel_cure is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	goto err;
 }
 
