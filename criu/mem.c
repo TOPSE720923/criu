@@ -29,7 +29,7 @@
 
 #include "protobuf.h"
 #include "images/pagemap.pb-c.h"
-
+#include <sys/time.h>
 static int task_reset_dirty_track(int pid)
 {
 	int ret;
@@ -278,6 +278,10 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 	unsigned cpp_flags = 0;
 	unsigned long pmc_size;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pr_info("\n");
 	pr_info("Dumping pages (type: %d pid: %d)\n", CR_FD_PAGES, item->pid->real);
 	pr_info("----------------------------------------\n");
@@ -328,6 +332,12 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 			xfer.parent = NULL + 1;
 	}
 
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     __parasite_pagesS time  after step 0 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 	/*
 	 * Step 1 -- generate the pagemap
 	 */
@@ -371,9 +381,28 @@ again:
 			goto out_xfer;
 	}
 
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     __parasite_pagesS time  after step 1 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	ret = drain_pages(pp, ctl, args);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     __parasite_pagesS time  after step 2 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	if (!ret && !mdc->pre_dump)
 		ret = xfer_pages(pp, &xfer);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     __parasite_pagesS time  after step 3 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 	if (ret)
 		goto out_xfer;
 
@@ -384,6 +413,12 @@ again:
 	 */
 
 	ret = task_reset_dirty_track(item->pid->real);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("     __parasite_pagesS time  after step 4 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 out_xfer:
 	if (!mdc->pre_dump)
 		xfer.close(&xfer);
@@ -406,7 +441,16 @@ int parasite_dump_pages_seized(struct pstree_item *item,
 	int ret;
 	struct parasite_dump_pages_args *pargs;
 
+	struct timeval start,end;  
+    long dif_sec, dif_usec;  
+    gettimeofday(&start, NULL);
+
 	pargs = prep_dump_pages_args(ctl, vma_area_list, mdc->pre_dump);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("       parasite_pages time  after prep_dump_pages_args is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 	/*
 	 * Add PROT_READ protection for all VMAs we're about to
@@ -418,6 +462,12 @@ int parasite_dump_pages_seized(struct pstree_item *item,
 
 	pargs->add_prot = PROT_READ;
 	ret = compel_rpc_call_sync(PARASITE_CMD_MPROTECT_VMAS, ctl);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("       parasite_pages time  after compel_rpc_call_sync is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 	if (ret) {
 		pr_err("Can't dump unprotect vmas with parasite\n");
 		return ret;
@@ -429,6 +479,13 @@ int parasite_dump_pages_seized(struct pstree_item *item,
 	}
 
 	ret = __parasite_dump_pages_seized(item, pargs, vma_area_list, mdc, ctl);
+
+	gettimeofday(&end, NULL);  
+    dif_sec = end.tv_sec - start.tv_sec;  
+    dif_usec = end.tv_usec - start.tv_usec;       
+    printf("       parasite_pages time  after compel_rpc_call_sync is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
+
 	if (ret) {
 		pr_err("Can't dump page with parasite\n");
 		/* Parasite will unprotect VMAs after fail in fini() */
