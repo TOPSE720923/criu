@@ -365,12 +365,30 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 again:
 			ret = generate_iovs(vma_area, pp, map, &off,
 				has_parent);
+
+			gettimeofday(&end, NULL);  
+    		dif_sec = end.tv_sec - start.tv_sec;  
+    		dif_usec = end.tv_usec - start.tv_usec;       
+   			printf("     __parasite_pagesS time  after step 1.1 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 			if (ret == -EAGAIN) {
 				BUG_ON(!(pp->flags & PP_CHUNK_MODE));
 
 				ret = drain_pages(pp, ctl, args);
+
+				gettimeofday(&end, NULL);  
+    			dif_sec = end.tv_sec - start.tv_sec;  
+    			dif_usec = end.tv_usec - start.tv_usec;       
+   				printf("     __parasite_pagesS time  after step 1.2 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 				if (!ret)
 					ret = xfer_pages(pp, &xfer);
+
+				gettimeofday(&end, NULL);  
+    			dif_sec = end.tv_sec - start.tv_sec;  
+    			dif_usec = end.tv_usec - start.tv_usec;       
+   				printf("     __parasite_pagesS time  after step 1.3 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
+
 				if (!ret) {
 					page_pipe_reinit(pp);
 					goto again;
