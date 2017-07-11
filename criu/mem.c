@@ -277,10 +277,15 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 	int ret = -1;
 	unsigned cpp_flags = 0;
 	unsigned long pmc_size;
-
+	int vm_count=0;
 	struct timeval start,end;  
     long dif_sec, dif_usec;  
     gettimeofday(&start, NULL);
+
+    unsigned int		nr_aios_count=0;
+	unsigned long		priv_size_count=0; /* nr of pages in private VMAs */
+	unsigned long		priv_longest_count=0; /* nr of pages in longest private VMA */
+	unsigned long		shared_longest_count=0;
 
 	pr_info("\n");
 	pr_info("Dumping pages (type: %d pid: %d)\n", CR_FD_PAGES, item->pid->real);
@@ -346,7 +351,12 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 		bool has_parent = !!xfer.parent;
 		u64 off = 0;
 		u64 *map;
-
+		printf("vma item %d  nr_aios is%u priv_size is%ld priv_longest is %ld  shared_longest is %ld\n",vm_count,vm_area_list->nr_aios,
+			vm_area_list->priv_size ,vm_area_list->priv_longest,vm_area_list->shared_longest );
+		nr_aios_count+=nr_aios;
+		priv_size_count+=priv_size;
+		priv_longest_count+=priv_longest;
+		shared_longest_count+=shared_longest;
 		if (!vma_area_is_private(vma_area, kdat.task_size) &&
 				!vma_area_is(vma_area, VMA_ANON_SHARED))
 			continue;
@@ -399,7 +409,8 @@ again:
 			goto out_xfer;
 	}
 
-
+	printf("****vma item %d  nr_aios is%u priv_size_count is%ld priv_longest_count is %ld  shared_longest_count is %ld\n",vm_count,nr_aios_count,
+			priv_size_count ,priv_longest_count,shared_longest_count );
 	gettimeofday(&end, NULL);  
     dif_sec = end.tv_sec - start.tv_sec;  
     dif_usec = end.tv_usec - start.tv_usec;       
