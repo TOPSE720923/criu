@@ -288,7 +288,7 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 	unsigned long		priv_longest_count=0; /* nr of pages in longest private VMA */
 	unsigned long		shared_longest_count=0;
 
-	my_vma_area_list=vm_area_list;
+	my_vma_area_list=vma_area_list;
 	pr_info("\n");
 	pr_info("Dumping pages (type: %d pid: %d)\n", CR_FD_PAGES, item->pid->real);
 	pr_info("----------------------------------------\n");
@@ -359,7 +359,7 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 		priv_size_count+=my_vma_area_list->priv_size;
 		priv_longest_count+=my_vma_area_list->priv_longest;
 		shared_longest_count+=my_vma_area_list->shared_longest;
-		my_vma_area_list=vm_area_list->h->next;
+		my_vma_area_list=vma_area_list->h->next;
 		if (!vma_area_is_private(vma_area, kdat.task_size) &&
 				!vma_area_is(vma_area, VMA_ANON_SHARED))
 			continue;
