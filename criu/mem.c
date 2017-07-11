@@ -351,12 +351,12 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 		bool has_parent = !!xfer.parent;
 		u64 off = 0;
 		u64 *map;
-		printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count,vma_area_list->nr_aios,
-			vma_area_list->priv_size ,vma_area_list->priv_longest,vma_area_list->shared_longest );
-		nr_aios_count+=vma_area_list->nr_aios;
-		priv_size_count+=vma_area_list->priv_size;
-		priv_longest_count+=vma_area_list->priv_longest;
-		shared_longest_count+=vma_area_list->shared_longest;
+		printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count++,vma_area->nr_aios,
+			vma_area->priv_size ,vma_area->priv_longest,vma_area->shared_longest );
+		nr_aios_count+=vma_area->nr_aios;
+		priv_size_count+=vma_area->priv_size;
+		priv_longest_count+=vma_area->priv_longest;
+		shared_longest_count+=vma_area->shared_longest;
 		if (!vma_area_is_private(vma_area, kdat.task_size) &&
 				!vma_area_is(vma_area, VMA_ANON_SHARED))
 			continue;
