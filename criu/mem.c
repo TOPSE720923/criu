@@ -347,12 +347,12 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 
 
     list_for_each_entry(my_vma_area_list,&vma_area_list->h,h){
-    	printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count++,&my_vma_area_list->nr_aios,
-			&my_vma_area_list->priv_size ,&my_vma_area_list->priv_longest,&my_vma_area_list->shared_longest );
-		nr_aios_count+=&my_vma_area_list->nr_aios;
-		priv_size_count+=&my_vma_area_list->priv_size;
-		priv_longest_count+=&my_vma_area_list->priv_longest;
-		shared_longest_count+=&my_vma_area_list->shared_longest;
+    	printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count++,*my_vma_area_list->nr_aios,
+			*my_vma_area_list->priv_size ,*my_vma_area_list->priv_longest,*my_vma_area_list->shared_longest );
+		nr_aios_count+=*my_vma_area_list->nr_aios;
+		priv_size_count+=*my_vma_area_list->priv_size;
+		priv_longest_count+=*my_vma_area_list->priv_longest;
+		shared_longest_count+=*my_vma_area_list->shared_longest;
 		//my_vma_area_list=vma_area_list->h->next;
     }
 
