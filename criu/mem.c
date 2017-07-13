@@ -345,14 +345,19 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
     printf("     __parasite_pagesS time  after step 0 is %ldsec (%ld us)\n\n", dif_sec, dif_sec*1000000+dif_usec);
 
 
+    vma_area = list_entry((&vma_area_list->h)->next, typeof(*vma_area), list);
+    printf("vma_area_list->h point is%d\n",&vma_area_list->h );
+    printf("vma_area point is \n",&vma_area);
+    vma_area = list_entry(vma_area->list.prev, typeof(*vma_area), list);
+    printf("vma_area point is \n",&vma_area);
 
     list_for_each_entry(my_vma_area_list,&vma_area_list->h,h){
-    	printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count++,*my_vma_area_list->nr_aios,
-			*my_vma_area_list->priv_size ,*my_vma_area_list->priv_longest,*my_vma_area_list->shared_longest );
-		nr_aios_count+=*my_vma_area_list->nr_aios;
-		priv_size_count+=*my_vma_area_list->priv_size;
-		priv_longest_count+=*my_vma_area_list->priv_longest;
-		shared_longest_count+=*my_vma_area_list->shared_longest;
+    	printf("vma item %d  nr_aios is%u priv_size is%lu priv_longest is %lu  shared_longest is %lu\n",vm_count++,my_vma_area_list->nr_aios,
+			my_vma_area_list->priv_size ,my_vma_area_list->priv_longest,my_vma_area_list->shared_longest );
+		nr_aios_count+=my_vma_area_list->nr_aios;
+		priv_size_count+=my_vma_area_list->priv_size;
+		priv_longest_count+=my_vma_area_list->priv_longest;
+		shared_longest_count+=my_vma_area_list->shared_longest;
 		//my_vma_area_list=vma_area_list->h->next;
     }
 
@@ -375,7 +380,7 @@ static int __parasite_dump_pages_seized(struct pstree_item *item,
 				continue;
 			has_parent = false;
 		}
-
+		printf("VmaEntry is %s \n",vma_area->e );
 		map = pmc_get_map(&pmc, vma_area);
 		if (!map)
 			goto out_xfer;
